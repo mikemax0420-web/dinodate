@@ -1,6 +1,7 @@
-name = "dino-date"
-compatibility_date = "2024-01-01"
+name = "dinodate"
+compatibility_date = "2024-04-01"
+pages_build_output_dir = "."
 
-# This forces the AI binding to exist in every deployment
+# This binds the AI so Cloudflare can't "forget" it
 [ai]
 binding = "AI"
