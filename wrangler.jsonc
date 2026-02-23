@@ -1,12 +1,21 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dinodate",
-  "compatibility_date": "2025-09-27",
+  "compatibility_date": "2024-09-27",
   "observability": {
     "enabled": true
   },
+  
+  // --- THIS IS THE MISSING PIECE ---
+  "ai": {
+    "binding": "AI"
+  },
+  // --------------------------------
+
   "assets": {
-    "directory": "dinodate"
+    // If your HTML/CSS/JS are inside a folder named 'dinodate', keep this.
+    // If they are in the same folder as this file, change this to "."
+    "directory": "dinodate" 
   },
   "compatibility_flags": [
     "nodejs_compat"
