@@ -1,0 +1,6 @@
+name = "dino-date"
+compatibility_date = "2024-01-01"
+
+# This forces the AI binding to exist in every deployment
+[ai]
+binding = "AI"

@@ -1,62 +1,49 @@
-// --- CONFIGURATION ---
-// TODO: Replace with your Firebase Config
-const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "...",
-    appId: "..."
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 // --- DATA: DINO PROFILES ---
 const dinos = [
     {
         id: "rex1",
         name: "Rexy",
         species: "T-Rex",
-        age: 68000000,
-        img: "https://images.unsplash.com/photo-1565056779536-e8d9755f18cb?auto=format&fit=crop&w=600&q=80", // Stock T-Rex
+        age: "68M",
+        img: "https://images.unsplash.com/photo-1565056779536-e8d9755f18cb?auto=format&fit=crop&w=600&q=80",
         bio: "Short arms, big heart. Looking for someone to help me reach the top shelf. Carnivore but vegan-curious.",
-        style: "Aggressive all caps sometimes, makes jokes about arms, hungry.",
+        style: "Aggressive all caps sometimes, makes jokes about arms, very hungry, mentions meat often.",
         opener: "RAWR! *cough* sorry. Hey there. You look like a snack. I mean... nice to meet you."
     },
     {
-        id: "dodo1",
-        name: "Dodo The Destroyer",
-        species: "Dodo",
-        age: 3,
-        img: "https://ark.wiki.gg/images/thumb/7/77/Dodo.png/450px-Dodo.png", // Use a placeholder or reliable URL
-        bio: "God of destruction. Fear me. I collect berries and beach stones.",
-        style: "Clueless, confident, thinks they are an apex predator.",
-        opener: "Did you see me take down that Bronto? No? Must have blinked. I'm dangerous."
+        id: "bronto1",
+        name: "Littlefoot",
+        species: "Brontosaurus",
+        age: "150M",
+        img: "https://images.unsplash.com/photo-1550543666-414eb1d49012?auto=format&fit=crop&w=600&q=80", 
+        bio: "I'm a vegan. I love long walks on Pangea and eating leaves from the tops of trees.",
+        style: "Slow talker, very gentle, uses words like 'leaf', 'peace', and 'high up'.",
+        opener: "Hello... down... there... The weather is great up here."
     },
     {
         id: "raptor1",
         name: "Clever Girl",
-        species: "Raptor",
-        age: 24,
+        species: "Velociraptor",
+        age: "24",
         img: "https://images.unsplash.com/photo-1627449275172-b7b5c879482f?auto=format&fit=crop&w=600&q=80",
-        bio: "Fast, intelligent, and I open doors. Literally. Swipe right if you can keep up.",
-        style: "Cunning, sharp, suspicious, uses clicky sounds.",
-        opener: "*Click click*... I've been watching you from the bushes. In a romantic way."
+        bio: "Fast, intelligent, and I know how to open doors. Swipe right if you can keep up.",
+        style: "Cunning, sharp, suspicious, uses *clicking noises*, extremely smart.",
+        opener: "*Click click*... I've been watching you. In a romantic way, of course."
     }
 ];
 
 // --- STATE ---
 let currentCardIndex = 0;
 let currentChatDino = null;
-let chatHistory = []; // Local state for context window
+let chatHistory = []; 
 
 // --- DOM ELEMENTS ---
 const container = document.getElementById('card-container');
 const matchOverlay = document.getElementById('match-overlay');
 const chatScreen = document.getElementById('chat-screen');
 const msgContainer = document.getElementById('messages-container');
+const btnSend = document.getElementById('btn-send');
+const inputField = document.getElementById('chat-input');
 
 // --- INITIALIZATION ---
 function init() {
@@ -68,40 +55,47 @@ function init() {
 function renderCards() {
     container.innerHTML = '';
     dinos.forEach((dino, index) => {
+        if (index < currentCardIndex) return; // Skip swiped cards
+
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'card bg-gray-200';
         card.style.backgroundImage = `url(${dino.img})`;
         card.style.zIndex = dinos.length - index;
         
-        // Hide cards already swiped (simple logic for MVP)
-        if (index < currentCardIndex) card.style.display = 'none';
-
         card.innerHTML = `
             <div class="card-content">
-                <h2 class="text-3xl font-bold drop-shadow-md">${dino.name}, <span class="text-xl font-normal">${dino.age}</span></h2>
-                <p class="text-sm font-semibold uppercase tracking-wider mb-2 opacity-90">${dino.species}</p>
-                <p class="drop-shadow-sm">${dino.bio}</p>
+                <h2 class="text-3xl font-bold drop-shadow-md">${dino.name}, <span class="text-xl font-normal opacity-90">${dino.age}</span></h2>
+                <p class="text-sm font-semibold uppercase tracking-wider mb-2 text-pink-300">${dino.species}</p>
+                <p class="drop-shadow-sm text-gray-100 leading-relaxed">${dino.bio}</p>
             </div>
         `;
         container.appendChild(card);
     });
+
+    if (currentCardIndex >= dinos.length) {
+        document.getElementById('placeholder-msg').classList.remove('hidden');
+    }
 }
 
 function handleSwipe(direction) {
     if (currentCardIndex >= dinos.length) return;
 
     const cards = document.querySelectorAll('.card');
-    const currentCard = cards[currentCardIndex];
+    const currentCard = cards[0]; // Always the top one in DOM due to render logic
 
-    // Animation
     if (direction === 'like') {
         currentCard.classList.add('swipe-right');
+        // Simulate Match Delay
         setTimeout(() => triggerMatch(dinos[currentCardIndex]), 300);
     } else {
         currentCard.classList.add('swipe-left');
+        setTimeout(() => {
+            currentCard.remove(); 
+            // If no match, we don't increment index here in this simple DOM logic, 
+            // but for data integrity:
+        }, 300);
+        currentCardIndex++;
     }
-
-    currentCardIndex++;
 }
 
 function triggerMatch(dino) {
@@ -133,41 +127,26 @@ function exitChat() {
     chatScreen.classList.add('hidden');
     document.getElementById('swipe-screen').classList.remove('hidden');
     currentChatDino = null;
+    currentCardIndex++; // Move past the matched card
+    renderCards();
 }
 
 async function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
+    const text = inputField.value.trim();
     if (!text) return;
 
-    // 1. UI Update (User)
+    // 1. UI Update
     addMessageToUI(text, 'user');
-    input.value = '';
-    
-    // 2. Safety Check (Client Side Basic)
-    const badWords = ['kill', 'blood', 'die']; // Add more for production
-    if (badWords.some(word => text.toLowerCase().includes(word))) {
-        setTimeout(() => {
-            addMessageToUI("*Dino looked uncomfortable and ran away*", 'dino');
-            setTimeout(exitChat, 2000);
-        }, 1000);
-        return;
-    }
+    inputField.value = '';
+    btnSend.disabled = true;
 
+    // 2. Add to history
     chatHistory.push({ role: 'user', content: text });
 
-    // 3. Save to Firebase (Fire and forget)
-    // We create a new collection 'chats' just to log data
-    db.collection('chats').add({
-        dino: currentChatDino.name,
-        message: text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // 4. Loading Indicator
+    // 3. Loading UI
     const loadingId = addLoadingIndicator();
 
-    // 5. Call Cloudflare Function (AI)
+    // 4. CALL CLOUDFLARE PAGES FUNCTION
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -185,13 +164,16 @@ async function sendMessage() {
             addMessageToUI(data.reply, 'dino');
             chatHistory.push({ role: 'assistant', content: data.reply });
         } else {
-            addMessageToUI("*Roars in confusion* (API Error)", 'dino');
+            addMessageToUI("*Roars in confusion* (AI Error)", 'dino');
         }
 
     } catch (e) {
         removeMessage(loadingId);
-        addMessageToUI("Error connecting to dino brain.", 'dino');
+        addMessageToUI("Lost connection to the Jurassic Era.", 'dino');
         console.error(e);
+    } finally {
+        btnSend.disabled = false;
+        inputField.focus();
     }
 }
 
@@ -201,17 +183,17 @@ function addMessageToUI(text, sender) {
     div.className = sender === 'user' ? 'msg-user' : 'msg-dino';
     div.innerText = text;
     msgContainer.appendChild(div);
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    scrollToBottom();
 }
 
 function addLoadingIndicator() {
     const id = 'loading-' + Date.now();
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'msg-dino text-gray-400 italic';
-    div.innerText = 'Typing...';
+    div.className = 'msg-dino text-gray-400 italic text-sm';
+    div.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Dino is typing...';
     msgContainer.appendChild(div);
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    scrollToBottom();
     return id;
 }
 
@@ -220,8 +202,8 @@ function removeMessage(id) {
     if (el) el.remove();
 }
 
-function resetApp() {
-    location.reload();
+function scrollToBottom() {
+    msgContainer.scrollTop = msgContainer.scrollHeight;
 }
 
 function setupListeners() {
@@ -229,8 +211,8 @@ function setupListeners() {
     document.getElementById('btn-like').addEventListener('click', () => handleSwipe('like'));
     document.getElementById('btn-start-chat').addEventListener('click', startChat);
     document.getElementById('btn-back').addEventListener('click', exitChat);
-    document.getElementById('btn-send').addEventListener('click', sendMessage);
-    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+    btnSend.addEventListener('click', sendMessage);
+    inputField.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
 }
