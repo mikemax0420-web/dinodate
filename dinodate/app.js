@@ -115,7 +115,7 @@ btnStartChat.addEventListener('click', () => {
     messagesContainer.innerHTML = ''; // Clear old chat
     chatHistory = []; // Reset history
     
-    // Initial Greeting from Dino (Mock)
+    // Initial Greeting from Dino
     const initialGreeting = `*Roar* Hey there! I'm ${currentChatDino.name}.`;
     addMessageToUI(initialGreeting, 'dino');
     chatHistory.push({ role: 'assistant', content: initialGreeting });
@@ -133,23 +133,24 @@ inputField.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// --- CHAT LOGIC (API INTEGRATION) ---
+// --- CHAT LOGIC ---
 async function sendMessage() {
     const text = inputField.value.trim();
     if (!text) return;
 
-    // 1. Add User Message
+    // 1. Add User Message to UI
     addMessageToUI(text, 'user');
     inputField.value = '';
     btnSend.disabled = true;
     chatHistory.push({ role: 'user', content: text });
     
-    // 2. Add Loading State
+    // 2. Add Loading Indicator
     const loadingId = 'loading-' + Date.now();
     addLoadingIndicator(loadingId);
 
     try {
-        // 3. Send to Cloudflare Function (Gemini)
+        // 3. Send to Cloudflare Function
+        // This expects functions/api/chat.js to exist
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -159,22 +160,35 @@ async function sendMessage() {
             })
         });
 
+        // 4. Debugging Error Handling
+        if (!response.ok) {
+            // Read the error text from the server
+            const errorText = await response.text();
+            
+            if (response.status === 404) {
+                throw new Error("404 Not Found: The /api/chat function is missing.");
+            } else if (response.status === 500) {
+                throw new Error("500 Server Error: The function crashed (Check logs).");
+            } else {
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        }
+
         const data = await response.json();
-        
-        // 4. Handle Response
         removeMessage(loadingId);
 
         if (data.reply) {
             addMessageToUI(data.reply, 'dino');
             chatHistory.push({ role: 'assistant', content: data.reply });
         } else {
-            addMessageToUI("*Confused roar* (API Error)", 'dino');
+            addMessageToUI("*Confused roar* (No reply data)", 'dino');
         }
 
     } catch (e) {
         removeMessage(loadingId);
-        addMessageToUI("Lost connection to the Jurassic Era.", 'dino');
-        console.error(e);
+        // Display the ACTUAL error in the chat bubble so you can fix it
+        addMessageToUI(`Connection Error: ${e.message}`, 'dino');
+        console.error("Full Error Details:", e);
     } finally {
         btnSend.disabled = false;
         inputField.focus();
@@ -197,7 +211,6 @@ function addLoadingIndicator(id) {
     div.innerText = "Thinking...";
     messagesContainer.appendChild(div);
     scrollToBottom();
-    return id;
 }
 
 function removeMessage(id) {
