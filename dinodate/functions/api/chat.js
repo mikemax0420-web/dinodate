@@ -2,7 +2,7 @@ export async function onRequestPost({ request }) {
   // ---------------------------------------------------------
   // 🔴 PASTE YOUR GEMINI API KEY HERE (Between the quotes)
   // ---------------------------------------------------------
-  const GEMINI_API_KEY = "AIzaSy..."; 
+  const GEMINI_API_KEY = "AIzaSyDqEm7BJP0q0c0Jm5K4h0noCpXCc1rBd24"; 
 
   try {
     // 1. Parse the incoming data from app.js
