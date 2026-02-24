@@ -1,83 +1,78 @@
 export async function onRequestPost({ request }) {
   // ---------------------------------------------------------
-  // 🔴 PASTE YOUR GEMINI API KEY HERE (Between the quotes)
+  // 🔴 REPLACE WITH YOUR ACTUAL GEMINI API KEY
   // ---------------------------------------------------------
   const GEMINI_API_KEY = "AIzaSyDqEm7BJP0q0c0Jm5K4h0noCpXCc1rBd24"; 
 
   try {
-    // 1. Parse the incoming data from app.js
     const { messages, dinoPersona } = await request.json();
 
-    // 2. Define the Dino's Personality
-    // We tell Gemini to act like the specific dinosaur
-    const systemPrompt = `
-      You are a ${dinoPersona.species || "Dinosaur"}.
-      Name: ${dinoPersona.name}.
-      Personality: ${dinoPersona.type} - ${dinoPersona.style}.
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_ACTUAL_GEMINI_API_KEY_HERE") {
+        throw new Error("API Key not configured.");
+    }
+
+    // 1. Construct the System Instruction
+    const systemInstruction = `
+      You are roleplaying as a Dinosaur on a dating app called DinoDate.
+      YOUR PROFILE:
+      - Name: ${dinoPersona.name}
+      - Species: ${dinoPersona.species}
+      - Bio: ${dinoPersona.bio}
       
-      INSTRUCTIONS:
-      - Reply to the user as this dinosaur.
-      - Keep responses SHORT (under 2 sentences).
-      - Be funny, flirty, or aggressive based on your personality type.
-      - Do NOT say you are an AI. You are a dinosaur.
+      GUIDELINES:
+      - Keep responses short (under 2 sentences) and conversational.
+      - Do NOT say you are an AI. Stay in character.
+      - If you are a T-Rex, complain about short arms.
+      - If you are a Triceratops, be defensive but sweet.
+      - If you are a Velociraptor, be clever and slightly threatening.
+      - Flirt using prehistoric puns.
     `;
 
-    // 3. Convert Chat History to Gemini Format
-    // Gemini expects roles to be 'user' or 'model' (not 'assistant')
-    const geminiHistory = messages.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    // 2. Format History for Gemini (User/Model)
+    // We inject the system instruction as the very first 'user' part for stability
+    const geminiContent = [
+        { 
+            role: "user", 
+            parts: [{ text: systemInstruction }] 
+        },
+        ...messages.map(msg => ({
+            role: msg.role === 'assistant' || msg.role === 'dino' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+        }))
+    ];
 
-    // 4. Prepare the API Payload
-    const payload = {
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt }] }, // Priming the system
-        ...geminiHistory
-      ],
-      generationConfig: {
-        maxOutputTokens: 150, // Keep it short
-        temperature: 0.9      // High creativity
-      }
-    };
-
-    // 5. Send to Google
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
+    // 3. Call Gemini API
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }
-    );
+        body: JSON.stringify({
+            contents: geminiContent,
+            generationConfig: {
+                maxOutputTokens: 100,
+                temperature: 0.8
+            }
+        })
+    });
 
     const data = await response.json();
 
-    // 6. Handle Errors from Google
     if (data.error) {
-      console.error("Gemini Error:", data.error);
-      return new Response(JSON.stringify({ 
-        reply: "*Confused roar* (My AI brain is broken right now.)" 
-      }), { headers: { "Content-Type": "application/json" } });
+        console.error("Gemini API Error:", data.error);
+        return new Response(JSON.stringify({ reply: "ROAR! (Server Error: Check API Key)" }), { headers: { "Content-Type": "application/json" } });
     }
 
-    // 7. Get the text answer
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "*Growls silently*";
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "*Stares blankly*";
 
-    // 8. Send back to the frontend
-    return new Response(JSON.stringify({ 
-      reply: replyText 
-    }), {
-      headers: { "Content-Type": "application/json" }
+    return new Response(JSON.stringify({ reply: replyText }), {
+        headers: { "Content-Type": "application/json" }
     });
 
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ 
-      reply: "Lost connection to the Jurassic Era. (Server Error)" 
-    }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
+    return new Response(JSON.stringify({ reply: `Connection error: ${err.message}` }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
     });
   }
 }

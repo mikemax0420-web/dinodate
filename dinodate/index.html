@@ -1,428 +1,78 @@
-/**
- * 🦖 DINO BRAIN: OVERKILL EDITION
- * 15 Dinos. 5 Archetypes. Infinite Cringe.
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DinoDate - Prehistoric Love</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden max-w-md mx-auto shadow-2xl relative border-x border-gray-300">
 
-// ============================================================================
-// 1. THE ARCHETYPES (The "Vibe" Engine)
-// ============================================================================
-const ARCHETYPES = {
-  // --- THE CHAD (Rex, Spino, Giga, Yuty, Wyvern) ---
-  ALPHA: {
-    defaults: [
-      "I am the main character of this server.",
-      "My roar is louder than your insecurities.",
-      "I don't chase. I attract. (And then I eat).",
-      "Do you have high stats? I only date high stats.",
-      "I woke up and chose violence.",
-      "Less talking. More worshipping.",
-      "I am the danger.",
-      "Swiping left on me is a death wish.",
-      "I'm top of the food chain. You're... a garnish.",
-      "Make me laugh. I dare you."
-    ],
-    triggers: {
-      "love": [
-        "Love is for herbivores.",
-        "I love... the sound of bones crunching.",
-        "Romance is weakness. I am not weak.",
-        "I can fit your whole heart in my mouth.",
-        "Are you offering tribute?"
-      ],
-      "date": [
-        "We can go hunting. You run, I catch.",
-        "Dinner is on you. Literally.",
-        "I don't 'date'. I conquer.",
-        "Meet me at the volcano. Don't be late.",
-        "I'm expensive. I require Prime Meat."
-      ],
-      "cute": [
-        "I know.",
-        "Cute? I am TERRIFYING.",
-        "Don't patronize me, small thing.",
-        "I am a weapon of mass destruction, but thanks."
-      ],
-      "gym": [
-        "Every day is leg day.",
-        "Look at these gains.",
-        "I bench press Brontos.",
-        "Protein only."
-      ]
-    }
-  },
+    <!-- Header -->
+    <header class="bg-white p-4 shadow z-10 flex justify-between items-center">
+        <div class="text-pink-500 font-bold text-2xl flex items-center gap-2">
+            <i class="fas fa-fire"></i> DinoDate
+        </div>
+        <button onclick="location.reload()" class="text-gray-400 hover:text-pink-500"><i class="fas fa-redo"></i></button>
+    </header>
 
-  // --- THE NERVOUS WRECK (Dodo, Parasaur, Pteranodon, Galli) ---
-  NERVOUS: {
-    defaults: [
-      "Did you hear a twig snap?!",
-      "Is it safe here? It doesn't feel safe.",
-      "*Shaking visibly*",
-      "Please don't be a carnivore.",
-      "I have high anxiety.",
-      "I'm just trying to survive the update.",
-      "Stranger danger!",
-      "I am one bad day away from extinction.",
-      "My heart rate is 400 bpm.",
-      "I saw a red light. Was that a sniper?"
-    ],
-    triggers: {
-      "love": [
-        "Please don't break my heart. Or my bones.",
-        "Love is scary. Everything is scary.",
-        "Do you promise not to eat me?",
-        "I'm too young to die!",
-        "Holding hands? That sounds dangerous."
-      ],
-      "date": [
-        "A date? In the open? Are you crazy?",
-        "Can we hide in a bush?",
-        "I'm free... until a Raptor finds me.",
-        "Okay, but we have to whisper.",
-        "My life expectancy is 5 minutes, let's hurry."
-      ],
-      "hello": [
-        "AHH! Oh, hi.",
-        "Who are you?! Identify yourself!",
-        "Friendly? Are you friendly?",
-        "*Screams internally*",
-        "Don't sneak up on me!"
-      ],
-      "food": [
-        "I have berries! Take my berries!",
-        "Please don't look at me like I'm a snack.",
-        "I am vegan. Please be vegan."
-      ]
-    }
-  },
+    <!-- Main Container -->
+    <main class="flex-1 relative w-full h-full overflow-hidden bg-white">
+        
+        <!-- SWIPE SCREEN -->
+        <div id="swipe-screen" class="absolute inset-0 flex flex-col items-center justify-center p-4">
+            <div id="card-container" class="relative w-full h-[70vh] rounded-2xl shadow-xl bg-gray-200">
+                <!-- Cards injected by JS -->
+                <div id="placeholder-msg" class="hidden flex items-center justify-center h-full text-gray-500 font-bold">
+                    No more dinos nearby...
+                </div>
+            </div>
 
-  // --- THE TOXIC EX (Raptor, Troodon, Pego, Compy) ---
-  TOXIC: {
-    defaults: [
-      "Hehe.",
-      "I'm in your walls.",
-      "I stole your hoodie.",
-      "You look tired. You should sleep.",
-      "Sleep with one eye open.",
-      "I'm not crazy, I'm just 'passionate'.",
-      "Catch me if you can.",
-      "Swipe right for chaos.",
-      "I'm the red flag you're looking for.",
-      "Gaslight. Gatekeep. Girlboss."
-    ],
-    triggers: {
-      "love": [
-        "I will obsess over you.",
-        "Love me or fear me.",
-        "I'm the jealous type. I bite.",
-        "Mine. Mine. Mine.",
-        "If I can't have you, nobody can."
-      ],
-      "date": [
-        "Let's go steal eggs.",
-        "Night time is the best time.",
-        "I'm expensive.",
-        "Don't be boring or I'll rob you.",
-        "Let's go harass beach bobs."
-      ],
-      "cute": [
-        "I know I'm cute. Now give me your wallet.",
-        "Felt cute, might bite you later.",
-        "Pretty... deadly."
-      ],
-      "run": [
-        "I'm faster than you.",
-        "Running just makes it fun for me.",
-        "You can't hide."
-      ]
-    }
-  },
+            <!-- Controls -->
+            <div class="flex gap-8 mt-6 z-10">
+                <button id="btn-nope" class="w-16 h-16 rounded-full bg-white text-red-500 shadow-lg text-3xl border border-gray-200 hover:scale-110 transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button id="btn-like" class="w-16 h-16 rounded-full bg-white text-green-500 shadow-lg text-3xl border border-gray-200 hover:scale-110 transition flex items-center justify-center"><i class="fas fa-heart"></i></button>
+            </div>
+        </div>
 
-  // --- THE BOOMER (Trike, Stego, Bronto, Anky) ---
-  BOOMER: {
-    defaults: [
-      "Back in the Cretaceous...",
-      "Kids these days with their Tek suits.",
-      "Slow down.",
-      "I have a thick skin.",
-      "Get off my lawn.",
-      "I'm simple. I see plant, I eat plant.",
-      "Respect your elders.",
-      "Hmph.",
-      "I don't trust these flying robots.",
-      "I take naps at 2pm."
-    ],
-    triggers: {
-      "love": [
-        "I'm looking for a life partner. No games.",
-        "Slow and steady wins the race.",
-        "Loyalty is key.",
-        "I want to grow old. Older. I'm already old."
-      ],
-      "date": [
-        "A nice walk. Slowly.",
-        "Salad bar?",
-        "Early dinner. 4pm.",
-        "We can watch the sunset. If I'm awake."
-      ],
-      "hello": [
-        "Greetings.",
-        "Hmph. Hello.",
-        "Speak up, sonny.",
-        "Good day."
-      ],
-      "fast": [
-        "What's the rush?",
-        "I get there when I get there.",
-        "Running is for prey."
-      ]
-    }
-  },
+        <!-- MATCH OVERLAY -->
+        <div id="match-overlay" class="hidden absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-sm">
+            <h1 class="text-6xl font-black text-green-400 italic mb-4 animate-bounce" style="text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);">MATCH!</h1>
+            <p class="text-xl mb-8">You and <span id="match-name" class="font-bold text-pink-400">Dino</span> fancy each other.</p>
+            <div class="flex flex-col gap-4 w-full max-w-xs">
+                <button id="btn-start-chat" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold hover:bg-pink-600 shadow-lg transform transition hover:scale-105">Send Message</button>
+                <button onclick="location.reload()" class="border border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition">Keep Swiping</button>
+            </div>
+        </div>
 
-  // --- THE WEIRDO (Theri, Argy, Tapejara, Frog) ---
-  WEIRD: {
-    defaults: [
-      "I have specific needs.",
-      "Do you like feathers?",
-      "*Bird noises*",
-      "I carry heavy burdens.",
-      "My claws are for... tickling.",
-      "Hop on.",
-      "I observe from above.",
-      "Do you like my plumage?",
-      "I ate a bug today. It was crunchy."
-    ],
-    triggers: {
-      "love": [
-        "Let me groom you.",
-        "Preening is caring.",
-        "Fly with me.",
-        "I want to build a nest with you."
-      ],
-      "date": [
-        "I can pick you up. Literally.",
-        "Let's fly.",
-        "Swamp date?",
-        "I know a dead tree we can hang out in."
-      ],
-      "hand": [
-        "Look at my fingers.",
-        "Jazz hands!",
-        "Don't touch the claws."
-      ]
-    }
-  }
-};
+        <!-- CHAT SCREEN -->
+        <div id="chat-screen" class="hidden absolute inset-0 bg-white flex flex-col z-20">
+            <!-- Chat Header -->
+            <div class="bg-white p-3 border-b flex items-center gap-3 shadow-sm">
+                <button id="btn-back" class="text-gray-500 hover:bg-gray-100 p-2 rounded-full"><i class="fas fa-chevron-left"></i></button>
+                <img id="chat-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-gray-300 border border-gray-200">
+                <div>
+                    <h3 id="chat-name" class="font-bold text-gray-800 leading-tight">Dino</h3>
+                    <span class="text-xs text-green-500 font-medium">● Online (Hungry)</span>
+                </div>
+            </div>
 
-// ============================================================================
-// 2. THE 15 DINOS (Lore Specific Overrides)
-// ============================================================================
-const DINOS = {
-  // 1. REXY (Alpha)
-  "Rexy": {
-    type: "ALPHA",
-    specifics: {
-      "arm": ["DON'T MENTION THE ARMS.", "I can bench press a truck with these things.", "Short reach, big bite.", "Say that to my face."],
-      "pushup": ["I hate pushups.", "Next topic."],
-      "roar": ["ROAR!", "Did I scare you?", "My voice is deep."],
-      "meat": ["Steak. Rare.", "I only eat prime meat.", "You look delicious."]
-    }
-  },
+            <!-- Messages Area -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 scroll-smooth">
+                <!-- Messages injected here -->
+            </div>
 
-  // 2. SPINO (Alpha)
-  "SpinoSoprano": {
-    type: "ALPHA",
-    specifics: {
-      "swim": ["Wet and wild.", "I'm a water sign.", "Let's go to the swamp."],
-      "sail": ["My sail is distinct.", "It's for temperature regulation (and looking hot).", "Bigger sail = better mate."],
-      "fish": ["Sushi date?", "I slap fish.", "Pescatarian."],
-      "rex": ["I'm better than Rex.", "I killed a Rex once. Easy.", "Rex can't swim."]
-    }
-  },
+            <!-- Input Area -->
+            <div class="p-3 bg-white border-t flex gap-2 items-center">
+                <input type="text" id="chat-input" placeholder="Say something nice..." class="flex-1 bg-gray-100 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-300 transition">
+                <button id="btn-send" class="bg-pink-500 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-pink-600 shadow-md transition disabled:opacity-50"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
 
-  // 3. GIGA (Alpha)
-  "GigaChad": {
-    type: "ALPHA",
-    specifics: {
-      "rage": ["I am seeing red.", "Don't make me angry.", "My eyes are glowing."],
-      "big": ["I am the biggest.", "Rex is a baby compared to me.", "Size matters."],
-      "stone": ["I eat stone walls for breakfast.", "Your base is weak.", "I chew rocks."],
-      "heart": ["I will eat your heart. Literally.", "Yummy."]
-    }
-  },
+    </main>
 
-  // 4. RAPTOR (Toxic)
-  "CleverGirl": {
-    type: "TOXIC",
-    specifics: {
-      "pack": ["Me and the girls are watching you.", "Pack leader gets first bite.", "You can be the beta."],
-      "door": ["I know how to open doors.", "Lock your windows.", "Knock knock. Too late."],
-      "jump": ["*Pounces*", "I have a 10ft vertical.", "I'm on you."],
-      "clever": ["I know.", "I'm the smart one."]
-    }
-  },
-
-  // 5. TROODON (Toxic)
-  "NiteLite": {
-    type: "TOXIC",
-    specifics: {
-      "night": ["I own the night.", "Your torch won't save you.", "Glowing eyes."],
-      "sleep": ["Go to sleep.", "You look tired.", "Knock out.", "Sleep paralysis demon."],
-      "poison": ["Toxic trait? Literally poison.", "One bite, you snooze.", "Drain your stamina."]
-    }
-  },
-
-  // 6. PEGO (Toxic)
-  "StickyFingers": {
-    type: "TOXIC",
-    specifics: {
-      "steal": ["I didn't steal it, I 'borrowed' it.", "What berries?", "Check your pockets."],
-      "ugly": ["My mom says I'm handsome.", "Rude.", "I will rob you."],
-      "item": ["Mine now.", "Yoink.", "Thanks for the loot."]
-    }
-  },
-
-  // 7. DODO (Nervous)
-  "Doda": {
-    type: "NERVOUS",
-    specifics: {
-      "stupid": ["I'm not dumb, I'm... okay I'm dumb.", "I forgot what I was doing."],
-      "melon": ["I LOVE MELONS.", "Dodo love melon.", "Give me the fruit."],
-      "beach": ["I live on the beach. I die on the beach.", "Sand is my life."],
-      "farm": ["Please don't farm me for eggs.", "I am not a machine."]
-    }
-  },
-
-  // 8. PARASAUR (Nervous)
-  "Perry": {
-    type: "NERVOUS",
-    specifics: {
-      "scan": ["I see enemies.", "PING!", "Red dot detected.", "I'm a radar."],
-      "loud": ["*Honk*", "I have a distinct voice.", "Singing the song of my people."],
-      "detect": ["I know where you are.", "Enemy nearby!"]
-    }
-  },
-
-  // 9. PTERANODON (Nervous)
-  "Terry": {
-    type: "NERVOUS",
-    specifics: {
-      "spin": ["Do a barrel roll!", "Spinning is a good trick.", "Speed build."],
-      "stamina": ["I need a break.", "Landing for stamina.", "Can't fly forever.", "So tired."],
-      "bolas": ["I hate bolas.", "Don't throw that at me.", "Trapped."]
-    }
-  },
-
-  // 10. TRIKE (Boomer)
-  "TrikeMike": {
-    type: "BOOMER",
-    specifics: {
-      "horn": ["Three horns. Zero patience.", "My face is a shield.", "Don't touch the goods."],
-      "charge": ["I only run in straight lines.", "Get out of the way.", "Choo choo."],
-      "rex": ["I hate that guy.", "Rex is a bully.", "I can take him."]
-    }
-  },
-
-  // 11. BRONTO (Boomer)
-  "LittleFoot": {
-    type: "BOOMER",
-    specifics: {
-      "tall": ["How's the weather down there?", "I can see my house from here.", "Long neck."],
-      "tail": ["Swipe.", "I clear forests with one swing.", "Tail whip."],
-      "platform": ["We can build a house on my back.", "Mobile home.", "Party bus."]
-    }
-  },
-
-  // 12. ANKY (Boomer)
-  "AnkyDanky": {
-    type: "BOOMER",
-    specifics: {
-      "metal": ["I love heavy metal.", "Iron. Gold. Flint.", "Smashing rocks is therapy."],
-      "tail": ["Club tail.", "Don't stand behind me.", "Whack."],
-      "slow": ["I waddle.", "Carry me, Argy.", "I'm heavy."]
-    }
-  },
-
-  // 13. THERIZINO (Weird)
-  "TickleChicken": {
-    type: "WEIRD",
-    specifics: {
-      "tickle": ["I call them tickle fingers.", "Come here, let me scratch that itch.", "Murder hands."],
-      "tree": ["I hate trees. I slap them.", "Wood? I got wood.", "Deforestation is my hobby."],
-      "fiber": ["I collect delicate flowers.", "Gentle giant. Just kidding."]
-    }
-  },
-
-  // 14. ARGENTAVIS (Weird)
-  "ArgyBargy": {
-    type: "WEIRD",
-    specifics: {
-      "carry": ["Need a lift?", "I have high weight capacity.", "I can carry you to my nest."],
-      "smithy": ["I have a workbench in my pocket.", "Crafting on the go."],
-      "shiny": ["Ooh! Metal!", "I love shiny things."]
-    }
-  },
-
-  // 15. WYVERN (Alpha/Special)
-  "Khaleesi": {
-    type: "ALPHA",
-    specifics: {
-      "fire": ["Dracarys.", "Is it hot in here? Or is it me?", "I spit fire."],
-      "milk": ["Don't ask me for milk.", "Go find a knocked out female.", "Rude."],
-      "egg": ["My parents were stolen.", "I was born in lava."],
-      "fly": ["King of the skies.", "Look out below."]
-    }
-  }
-};
-
-// ============================================================================
-// 3. GLOBAL TRIGGERS (Jokes everyone makes)
-// ============================================================================
-const GLOBAL_TRIGGERS = {
-  "lag": ["It's not me, it's the server.", "Rubberbanding...", "Connection timeout."],
-  "ark": ["This game is pain.", "Why do we play this?", "Survival of the fittest."],
-  "bob": ["Beach Bob.", "Go punch a tree.", "Do you even have clothes?"],
-  "update": ["Is the server down?", "Nerfed again.", "I miss the old days."],
-  "mesh": ["Are you under the map?", "Cheater.", "Dev wipe incoming."],
-  "admin": ["My dad is an admin.", "Admin command: destroywilddinos.", "Reported."]
-};
-
-// ============================================================================
-// THE BRAIN FUNCTION
-// ============================================================================
-export const getDinoResponse = (dinoName, input) => {
-  const lowerInput = input.toLowerCase();
-
-  // 1. GLOBAL CHECKS (Does everyone know this word?)
-  for (const [key, responses] of Object.entries(GLOBAL_TRIGGERS)) {
-    if (lowerInput.includes(key)) {
-       return responses[Math.floor(Math.random() * responses.length)];
-    }
-  }
-
-  // 2. FIND DINO & ARCHETYPE
-  // We match partial names so "Rexy (Age 22)" matches "Rexy"
-  let dinoKey = Object.keys(DINOS).find(k => dinoName.includes(k));
-  // If we can't find the dino, default to Rexy logic
-  if (!dinoKey) dinoKey = "Rexy"; 
-  
-  const dino = DINOS[dinoKey];
-  const archetype = ARCHETYPES[dino.type];
-
-  // 3. SPECIFIC DINO LORE (Priority 1)
-  for (const [trigger, responses] of Object.entries(dino.specifics)) {
-    if (lowerInput.includes(trigger)) {
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-  }
-
-  // 4. ARCHETYPE TRIGGERS (Priority 2)
-  for (const [trigger, responses] of Object.entries(archetype.triggers)) {
-    if (lowerInput.includes(trigger)) {
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-  }
-
-  // 5. CHAOS FALLBACK (Priority 3)
-  // If nothing matched, say something random based on personality
-  return archetype.defaults[Math.floor(Math.random() * archetype.defaults.length)];
-};
+    <script src="app.js"></script>
+</body>
+</html>
